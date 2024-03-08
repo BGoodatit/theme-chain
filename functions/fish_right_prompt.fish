@@ -1,19 +1,21 @@
 function fish_right_prompt
   # Battery status with different symbols depending on state
-  set battery_status (battery)
-  switch "$battery_status"
-    case '*Discharging*'
-      set battery_symbol ''
-    case '*Charging*'
-      set battery_symbol ''
-    case '*Fully charged*'
-      set battery_symbol ''
-  end
+  set battery (upower -i $(upower -e | grep 'BAT') | grep -E "state|to full|percentage")
+  set battery_symbol '' # Default to fully charged symbol
+  echo "$battery" | grep -q "discharging"
+  and set battery_symbol ''
+  echo "$battery" | grep -q "charging"
+  and set battery_symbol ''
 
-  # Display battery status
-  echo -n (set_color cyan) "$battery_symbol $battery_status"
+  # Display battery status and symbol
+  set battery_percentage (echo "$battery" | grep 'percentage' | awk '{print $2}')
+  echo -n (set_color cyan) "$battery_symbol $battery_percentage"
 
   # Display time
+  set current_time (date '+%H:%M')
+  echo -n (set_color yellow) " $current_time"
+end
+
   set current_time (date '+%H:%M')
   echo -n (set_color yellow) " $current_time"
 end
